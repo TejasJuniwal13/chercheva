@@ -96,13 +96,13 @@ typedef struct {
         (vector)->data[(vector)->size++] = (item);      \
     } while (0)
 
-#define td_vec_append_bulk(vector, items, count)        \
-    do {                                                \
-        vec_alloc((vector), (vector)->size + count);    \
-        memcpy((vector)->data + (vector)->size,         \
-               (items),                                 \
-               (count)*sizeof(*(vector)->data));        \
-        (vector)->size += (count);                      \
+#define td_vec_append_bulk(vector, items, count)                \
+    do {                                                        \
+        td__vec_alloc((vector), (vector)->size + count);        \
+        memcpy((vector)->data + (vector)->size,                 \
+               (items),                                         \
+               (count)*sizeof(*(vector)->data));                \
+        (vector)->size += (count);                              \
     } while (0)
 
 TD_LIBDEF void td_string_toupper(String str);
@@ -111,8 +111,8 @@ TD_LIBDEF void td_string_append_cstr(String *string, const char *cstr);
 TD_LIBDEF void td_string_clear(String *string);
 TD_LIBDEF char *td_sv_to_cstr(String_View sv);
 TD_LIBDEF int td_read_entire_file(String *str, const char *path);
-
-#endif /* TDLIB_H */
+TD_LIBDEF u32 td_sv_hash(String_View sv);
+TD_LIBDEF String td_string_from_cstr(const char *cstr);
 
 #ifdef TDLIB_IMPLEMENTATION
 
@@ -205,4 +205,26 @@ TD_LIBDEF int td_read_entire_file(String *str, const char *path)
     return 1;
 }
 
+TD_LIBDEF String td_string_from_cstr(const char *cstr)
+{
+    String result = { 0 };
+    if (!cstr)
+        return result;
+
+    result.size = strlen(cstr);
+    result.alloc = result.size + 1;
+    result.data = malloc(result.alloc);
+    if (!result.data) {
+        result.size = 0;
+        result.alloc = 0;
+        return result;
+    }
+    
+    memcpy(result.data, cstr, result.size + 1);
+    
+    return result;
+}
+
 #endif /* TDLIB_IMPLEMENTATION */
+
+#endif /* TDLIB_H */
