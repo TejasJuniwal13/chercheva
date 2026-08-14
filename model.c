@@ -4,7 +4,7 @@
 #include "tdlib.h"
 
 #define MAP_INITSZ 64
-#define MAP_LOADF  0.5
+#define MAP_LOADF 0.5
 
 static void tf_rehash(TF_Map *map, size_t needed)
 {
@@ -13,7 +13,7 @@ static void tf_rehash(TF_Map *map, size_t needed)
     if (alloc == 0)
         alloc = MAP_INITSZ;
 
-    while ((f64)needed/alloc > MAP_LOADF)
+    while ((f64)needed / alloc > MAP_LOADF)
         alloc *= 2;
 
     if (alloc == map->alloc)
@@ -29,12 +29,13 @@ static void tf_rehash(TF_Map *map, size_t needed)
     map->data = new_tf;
     map->alloc = alloc;
 
-    for (size_t i = 0; i < old_alloc; ++i) {
+    for (size_t i = 0; i < old_alloc; ++i)
+    {
         if (old_tf[i].freq <= 0)
             continue;
 
         /* @Todo hash cachable */
-        String_View term  = {
+        String_View term = {
             .data = old_tf[i].term.data,
             .size = old_tf[i].term.size,
         };
@@ -59,7 +60,8 @@ TF_Entry *tf_lookup(const TF_Map *map, String term)
     size_t start = td_sv_hash(term_sv) % map->alloc;
     size_t index = start;
 
-    do {
+    do
+    {
         if (map->data[index].freq <= 0)
             return NULL;
 
@@ -67,7 +69,7 @@ TF_Entry *tf_lookup(const TF_Map *map, String term)
             return &map->data[index];
 
         index = (index + 1) % map->alloc;
-    } while (index != start);   /* keep probing until we wrap back to the start */
+    } while (index != start); /* keep probing until we wrap back to the start */
 
     return NULL;
 }
@@ -82,8 +84,10 @@ void tf_insert(TF_Map *map, TF_Entry tf)
     };
     size_t index = td_sv_hash(term) % map->alloc;
 
-    while (map->data[index].freq != 0) {
-        if (strcmp(map->data[index].term.data, tf.term.data) == 0) {
+    while (map->data[index].freq != 0)
+    {
+        if (strcmp(map->data[index].term.data, tf.term.data) == 0)
+        {
             map->data[index].freq += tf.freq;
             return;
         }
@@ -93,6 +97,49 @@ void tf_insert(TF_Map *map, TF_Entry tf)
 
     map->data[index] = tf;
     map->size++;
+}
+
+void docs_free(Document_Vector *docs)
+{
+    if (!docs || !docs->data)
+        return;
+
+    for (size_t i = 0; i < docs->size; ++i)
+    {
+        Document *doc = &docs->data[i];
+
+        if (doc->path.data)
+        {
+            free(doc->path.data);
+            doc->path.data = NULL;
+        }
+
+        if (doc->content.data)
+        {
+            free(doc->content.data);
+            doc->content.data = NULL;
+        }
+
+        if (doc->tf.data)
+        {
+            for (size_t j = 0; j < doc->tf.alloc; ++j)
+            {
+                TF_Entry *entry = &doc->tf.data[j];
+                if (entry->term.data)
+                {
+                    free(entry->term.data);
+                    entry->term.data = NULL;
+                }
+            }
+            free(doc->tf.data);
+            doc->tf.data = NULL;
+        }
+    }
+
+    free(docs->data);
+    docs->data = NULL;
+    docs->size = 0;
+    docs->alloc = 0;
 }
 
 f64 tf_weight(String term, const Document *d)
@@ -107,11 +154,11 @@ f64 tf_weight(String term, const Document *d)
 f64 idf_weight(String term, Document_Vector docs)
 {
     size_t df = 0;
-    for (size_t i = 0; i < docs.size; ++i) {
+    for (size_t i = 0; i < docs.size; ++i)
+    {
         if (tf_lookup(&docs.data[i].tf, term))
             df++;
     }
 
     return log(1 + (f64)docs.size / (1 + df));
 }
-
