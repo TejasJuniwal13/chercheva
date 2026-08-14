@@ -257,6 +257,6 @@ int main(void)
     free(results.data);
     // docs_free(&docs);
     free(query.data);
-        
+    docs_free(&docs);
     return 0;
 }
