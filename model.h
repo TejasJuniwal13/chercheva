@@ -26,6 +26,7 @@ typedef struct {
 
 TF_Entry *tf_lookup(const TF_Map *map, String term);
 void tf_insert(TF_Map *map, TF_Entry tf);
+void docs_free(Document_Vector *docs);
 f64 tf_weight(String term, const Document *d);
 f64 idf_weight(String term, Document_Vector docs);
 
