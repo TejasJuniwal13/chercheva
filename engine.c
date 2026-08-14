@@ -140,8 +140,10 @@ int load_doc_from_json(Document_Vector *docs, const char *path)
         TD_FATAL("td_read_entire_file: error loading document\n");
 
     cJSON *root = cJSON_Parse(json.data);
-    if (!root)
+    if (!root){
+        free(json.data);
         return 0;
+    }
 
     cJSON *doc_json;
     cJSON_ArrayForEach(doc_json, root) {
@@ -162,6 +164,7 @@ int load_doc_from_json(Document_Vector *docs, const char *path)
     }
 
     cJSON_Delete(root);
+    free(json.data);
     return 0;
 }
 
@@ -252,7 +255,8 @@ int main(void)
     }
 
     free(results.data);
-    //docs_free(&docs);
+    // docs_free(&docs);
+    free(query.data);
         
     return 0;
 }
