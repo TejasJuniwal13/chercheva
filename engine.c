@@ -201,9 +201,9 @@ static Search_Result_Vector search(Document_Vector docs, String query)
                 }));
     }
 
-    for (size_t i = 0; i < query_tokens.size; ++i) {
-        free(query_tokens.data[i].data);
-    }
+    // for (size_t i = 0; i < query_tokens.size; ++i) {
+    //     free(query_tokens.data[i].data);
+    // }
 
     free(query_tokens.data);
     
