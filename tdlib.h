@@ -186,8 +186,11 @@ TD_LIBDEF int td_read_entire_file(String *str, const char *path)
     rewind(fp);
 
     char *content = TD_MALLOC((size_t)size + 1);
-    if (!content)
+    if (!content){
+        // if malloc fails
+        fclose(fp);
         return 0;
+    }
 
     if (fread(content, 1, (size_t)size, fp) != (size_t)size) {
         free(content);
